@@ -24,15 +24,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential bc bison flex libssl-dev libelf-dev curl wget gcc-multilib g++-multilib
 
-      - name: Apply Xanmod Patch (Tùy chọn)
-        run: |
-          # LƯU Ý: Nếu source Darkmatter đã có sẵn Xanmod, lệnh này có thể báo lỗi conflict.
-          # Lệnh '|| true' giúp workflow không bị dừng nếu patch bị trùng.
-          echo "Tải và ép patch Xanmod 6.1.112..."
-          wget -q https://gitlab.com/xanmod/linux-patches/-/raw/master/linux-6.1.y-xanmod/patch-6.1.112-xanmod1.xz
-          xz -d patch-6.1.112-xanmod1.xz
-          patch -p1 --forward < patch-6.1.112-xanmod1 || true
-
       - name: Inject KernelSU Next
         run: |
           echo "Bơm mã nguồn KSU Next..."
