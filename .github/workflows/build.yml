@@ -51,19 +51,14 @@ jobs:
 
       - name: Configure Kernel
         run: |
-          echo "Nạp config mặc định..."
-          make ${{ github.event.inputs.defconfig }}
+          echo "Sử dụng config trích xuất từ file 40MB..."
+          # Lấy file .config bạn vừa push lên làm cấu hình chuẩn
           
-          echo "Bật các cờ kprobes, overlayfs và susfs..."
+          echo "Bơm cờ cho KSU và SUSFS..."
           scripts/config --enable CONFIG_KPROBES
           scripts/config --enable CONFIG_OVERLAY_FS
           scripts/config --enable CONFIG_MODULES
-          scripts/config --enable CONFIG_KSU_SUSFS # Bật cờ tàng hình SusFS
-
-          # Bật KPM (KernelPatch Management) của SukiSU
           scripts/config --enable CONFIG_KPM
-
-          # Bật KALLSYMS (Yêu cầu bắt buộc của SukiSU cho thiết bị Non-GKI)
           scripts/config --enable CONFIG_KALLSYMS
           scripts/config --enable CONFIG_KALLSYMS_ALL
           
@@ -71,11 +66,20 @@ jobs:
 
       - name: Compile bzImage (Đốt CPU)
         run: |
+          echo "Build Kernel..."
           make -j$(nproc) bzImage
-
-      - name: Upload Artifact
+          
+          echo "Build Modules..."
+          make -j$(nproc) modules
+          
+          echo "Gom Modules lại vào một thư mục..."
+          make INSTALL_MOD_PATH=./output_modules modules_install
+          
+      - name: Upload Artifacts (bzImage + Modules)
         uses: actions/upload-artifact@v4
         with:
-          name: bzImage-gloria-ultimate
-          path: arch/x86/boot/bzImage
+          name: Darkmatter-KSU-Complete
+          path: |
+            arch/x86/boot/bzImage
+            output_modules/
           retention-days: 7
