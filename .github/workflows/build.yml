@@ -49,20 +49,24 @@ jobs:
           # Patch riêng cho KSU Next
           patch -p1 --forward < susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch || true
 
-      - name: Configure Kernel
+      - name: Configure Kernel (Sử dụng .config gốc 40MB)
         run: |
-          echo "Sử dụng config trích xuất từ file 40MB..."
-          # Lấy file .config bạn vừa push lên làm cấu hình chuẩn
+          echo "1. Kiểm tra sự tồn tại của file .config gốc..."
+          ls -la .config
           
-          echo "Bơm cờ cho KSU và SUSFS..."
+          echo "2. Bơm cờ KernelSU / SukiSU-Ultra vào cấu hình..."
           scripts/config --enable CONFIG_KPROBES
           scripts/config --enable CONFIG_OVERLAY_FS
           scripts/config --enable CONFIG_MODULES
+          
+          # Cờ bắt buộc nếu bạn dùng SukiSU-Ultra
           scripts/config --enable CONFIG_KPM
           scripts/config --enable CONFIG_KALLSYMS
           scripts/config --enable CONFIG_KALLSYMS_ALL
           
+          echo "3. Chuẩn hóa và tự động điền các dependency còn thiếu..."
           make olddefconfig
+
 
       - name: Compile bzImage (Đốt CPU)
         run: |
